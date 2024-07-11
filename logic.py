@@ -1,5 +1,5 @@
 import csv
-from typing import Tuple
+from typing import Tuple, Dict, Any
 from PyQt5.QtWidgets import QWidget, QMessageBox
 from gui.gui import Ui_End
 import os as os
@@ -15,7 +15,7 @@ class Logic(QWidget, Ui_End):
         """
         super().__init__()
         self.setupUi(self)
-        self.__votes = {'Isaiah': 0, 'Julia': 0, 'Jane': 0}
+        self.__votes = {}
 
         # vote menu buttons
         self.vote_button.clicked.connect(self.go_vote)
@@ -38,23 +38,23 @@ class Logic(QWidget, Ui_End):
         :return: None
         """
         self.stackedWidget.setCurrentIndex(2)
-        self.__votes = {'Isaiah': 0, 'Julia': 0, 'Jane': 0}
+        self.__votes = {}
 
-    def add_vote(self, candidate: str) -> None:
+    def add_vote(self, candidate: str, voter_id: int) -> None:
         """
         Adds a vote to the canadate selected in GUI
+        :param voter_id:
         :param candidate: Canadate selected
         :return: None
         """
-        if candidate in self.__votes:
-            self.__votes[candidate] += 1
+        self.__votes[voter_id] = candidate
 
-    def get_votes(self) -> Tuple[int, int, int]:
+    def get_votes(self) -> dict[Any, Any]:
         """
         gets the votes
         :return: Tuple[int, int, int]
         """
-        return self.__votes['Isaiah'], self.__votes['Julia'], self.__votes['Jane']
+        return self.__votes
 
     def go_vote(self) -> None:
         """
@@ -63,44 +63,93 @@ class Logic(QWidget, Ui_End):
         """
         self.stackedWidget.setCurrentIndex(0)
 
+    def reset_widgets(self) -> None:
+        self.Isaiah.setChecked(False)
+        self.Julia.setChecked(False)
+        self.Jane.setChecked(False)
+        self.VoterID.clear()
+
     def submit(self) -> None:
         """
         Submits the vote and redirects user to home page
         :return: None
         """
-        if not (self.Isaiah.isChecked() or self.Julia.isChecked() or self.Jane.isChecked()):
-            QMessageBox.warning(self, "Warning", "Please select a candidate before submitting your vote.")
-            return
-        voted = ''
-        if self.Isaiah.isChecked():
-            self.add_vote('Isaiah')
-            voted = 'Isaiah'
-        elif self.Julia.isChecked():
-            self.add_vote('Julia')
-            voted = 'Julia'
-        elif self.Jane.isChecked():
-            self.add_vote('Jane')
-            voted = 'Jane'
+        try:
 
-        QMessageBox.information(self, "Information", f"'Thank you for your vote!' - {voted}")
+            voter_id = self.VoterID.toPlainText().strip()
+            if voter_id == '':
+                raise BLANK_VOTER_ID
 
-        self.stackedWidget.setCurrentIndex(2)
+            voter_id = int(voter_id)
+
+            if voter_id < 1000:
+                raise Voter_ID_Greator_1k
+
+            try:
+
+                if not (self.Isaiah.isChecked() or self.Julia.isChecked() or self.Jane.isChecked()):
+                    QMessageBox.warning(self, "Warning", "Please select a candidate before submitting your vote.")
+                    return
+                if len(str(voter_id)) != 4:
+                    raise Incorrect_voter_ID_Len
+                elif voter_id in self.__votes.keys():
+                    print(self.__votes.keys())
+                    raise VoterID_Exists
+
+                voted = ''
+                if self.Isaiah.isChecked():
+                    self.add_vote('Isaiah', voter_id)
+                    voted = 'Isaiah'
+                elif self.Julia.isChecked():
+                    self.add_vote('Julia', voter_id)
+                    voted = 'Julia'
+                elif self.Jane.isChecked():
+                    self.add_vote('Jane', voter_id)
+                    voted = 'Jane'
+                QMessageBox.information(self, "Information", f"'Thank you for your vote!' - {voted}")
+                self.stackedWidget.setCurrentIndex(2)
+                self.reset_widgets()
+                self.label_4.setText('Voting Menu')
+
+            except Incorrect_voter_ID_Len:
+                self.label_4.setText('Voter ID Needs to Have a Length Of 4')
+            except VoterID_Exists:
+                self.label_4.setText('Cannot Vote Twice')
+        except ValueError:
+            self.label_4.setText('Only Numbers Are Allowed as Voter ID')
+        except BLANK_VOTER_ID:
+            self.label_4.setText('VOTER ID CANNOT BE BLANK')
+        except Voter_ID_Greator_1k:
+            self.label_4.setText('Voter ID needs to be\nGreater then 1000')
 
     def total_votes(self) -> None:
         """
         calculates the winner of the election
         :return:
         """
+
         print(self.__votes)
         self.stackedWidget.setCurrentIndex(1)
-        winning_candidate = max(self.__votes, key=self.__votes.get)
-        winning_votes = self.__votes[winning_candidate]
-        total = sum(self.__votes.values())
-        if self.__votes['Isaiah'] == self.__votes['Julia'] == self.__votes['Jane']:
-            self.label_5.setText(f'The election is a tie with {total} votes')
-        elif winning_votes > 0:
+        total_votes = {'Isaiah': 0,
+                       'Julia': 0,
+                       'Jane': 0}
+        for vote in self.__votes.values():
+            if vote == 'Isaiah':
+                total_votes['Isaiah'] += 1
+            elif vote == 'Julia':
+                total_votes['Julia'] += 1
+            elif vote == 'Jane':
+                total_votes['Jane'] += 1
+
+        winning_canadate = max(total_votes, key=total_votes.get)
+        winning_votes = total_votes[winning_canadate]
+        print(winning_canadate, winning_votes)
+
+        if all(count == winning_votes for count in total_votes.values()):
+            self.label_5.setText(f'The Election is a tie\n There is no winner\n{winning_votes} Votes')
+        else:
             self.label_5.setText(
-                f'THE WINNER OF THE ELECTION IS \n{winning_candidate}\n With {winning_votes} votes \n{total} Votes Casted')
+                f'THE WINNER OF THE ELECTION IS \n{winning_canadate}\n With {winning_votes} votes \n{sum(total_votes.values())} Votes Casted')
 
     def back_page(self) -> None:
         """
@@ -133,13 +182,23 @@ class Logic(QWidget, Ui_End):
                 raise WrongEnding
             if os.path.exists(file_name):
                 raise FileExistsError
-            candidates = self.__votes.keys()
-            total_votes = sum(self.__votes.values())
+
+            total_votes = {'Isaiah': 0, 'Julia': 0, 'Jane': 0}
+            for vote in self.__votes.values():
+                if vote == 'Isaiah':
+                    total_votes['Isaiah'] += 1
+                elif vote == 'Julia':
+                    total_votes['Julia'] += 1
+                elif vote == 'Jane':
+                    total_votes['Jane'] += 1
+
             with open(file_name, 'a', newline='') as file:
                 writer = csv.writer(file)
-                writer.writerow(candidates)
-                writer.writerow(self.get_votes())
-                writer.writerow(['Total Votes: ', total_votes])
+                writer.writerow(['Voter ID', 'Candidate'])
+                for voter_id, candidate in self.__votes.items():
+                    writer.writerow([voter_id, candidate])
+                writer.writerow([])
+                writer.writerow(['Total Votes: ', sum(total_votes.values())])
 
         except ValueError:
             self.errorlabel.setText('SAVE text does not match')
