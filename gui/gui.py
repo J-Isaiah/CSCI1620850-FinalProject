@@ -170,13 +170,6 @@ class Ui_End(object):
         self.pushButton = QtWidgets.QPushButton(self.export_data)
         self.pushButton.setGeometry(QtCore.QRect(160, 450, 111, 31))
         self.pushButton.setObjectName("pushButton")
-        self.lineEdit = QtWidgets.QLineEdit(self.export_data)
-        self.lineEdit.setGeometry(QtCore.QRect(160, 370, 113, 20))
-        self.lineEdit.setObjectName("lineEdit")
-        self.saveValidation = QtWidgets.QLabel(self.export_data)
-        self.saveValidation.setGeometry(QtCore.QRect(0, 350, 441, 20))
-        self.saveValidation.setAlignment(QtCore.Qt.AlignCenter)
-        self.saveValidation.setObjectName("saveValidation")
         self.stackedWidget.addWidget(self.export_data)
 
         self.retranslateUi(End)
@@ -202,7 +195,6 @@ class Ui_End(object):
         self.fileNameLabel.setText(_translate("End", "File Name"))
         self.label_6.setText(_translate("End", "File Should be .txt or .csv"))
         self.pushButton.setText(_translate("End", "Confirm"))
-        self.saveValidation.setText(_translate("End", "Type \"Save\" to save to system"))
 
 
 class Ui_end:

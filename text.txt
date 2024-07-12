@@ -1,0 +1,4 @@
+Voter ID,Candidate
+1001,Isaiah
+
+Total Votes: ,1

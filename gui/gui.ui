@@ -35,7 +35,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>3</number>
    </property>
    <widget class="QWidget" name="candidate_menu">
     <widget class="QPushButton" name="submit_vote">
@@ -70,11 +70,17 @@
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
-          <pointsize>30</pointsize>
+          <pointsize>15</pointsize>
          </font>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
         </property>
         <property name="text">
          <string>Candidate Menu</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -240,7 +246,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../ElectionImage.jpg</pixmap>
+      <pixmap>../../../.designer/ElectionImage.jpg</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -298,7 +304,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>ElectionImage.jpg</pixmap>
+      <pixmap>../../../.designer/backup/ElectionImage.jpg</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>

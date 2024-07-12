@@ -171,11 +171,9 @@ class Logic(QWidget, Ui_End):
         :return: None
         """
         try:
-            verify = self.lineEdit.text().strip().lower()
+
             file_name = self.fileNameLineEdit.text().strip().lower()
             print(file_name)
-            if verify != 'save':
-                raise ValueError
             if file_name == '':
                 raise FileEmpty
             if file_name[-4:] not in ['.txt', '.csv']:
